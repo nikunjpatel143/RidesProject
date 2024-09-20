@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,21 +23,50 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.rides.datas.Vehicle
 import com.example.rides.viewModels.RidesViewModel
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import com.google.android.material.progressindicator.CircularProgressIndicator
+import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun mainScreen(numbersOfVehicle: String, onClick: (vehicleDetail: String) -> Unit) {
 
     val ridesViewMode: RidesViewModel = hiltViewModel()
     ridesViewMode.getVehicleList(numbersOfVehicle)
     val values: State<List<Vehicle>> = ridesViewMode.vehicleData.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
-    Column(
+    var isRefreshing by remember { mutableStateOf(false) }
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = {
+            isRefreshing = true
+            coroutineScope.launch {
+                ridesViewMode.getVehicleList(numbersOfVehicle)
+                isRefreshing = false
+            }
+        }
+    )
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Color.White)
+            .pullRefresh(pullRefreshState)
     ) {
+
 
         LazyColumn {
             items(values.value) { item ->
@@ -78,6 +108,11 @@ fun mainScreen(numbersOfVehicle: String, onClick: (vehicleDetail: String) -> Uni
             }
 
         }
+
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = pullRefreshState,
+            modifier = Modifier.align(alignment = Alignment.TopCenter))
 
     }
 

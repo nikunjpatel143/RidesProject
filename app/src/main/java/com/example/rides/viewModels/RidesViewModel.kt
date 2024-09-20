@@ -16,6 +16,7 @@ class RidesViewModel @Inject constructor(private val ridesRepository: RidesRepos
 
     public val vehicleData : StateFlow<List<Vehicle>> get() =  ridesRepository.vehicleData
 
+
     fun getVehicleList(numberOfVehicle: String){
         viewModelScope.launch {
             ridesRepository.getVehicleData(numberOfVehicle)

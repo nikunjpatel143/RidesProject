@@ -27,6 +27,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
@@ -35,7 +36,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import com.google.android.material.progressindicator.CircularProgressIndicator
 import kotlinx.coroutines.launch
 
 
@@ -47,6 +47,8 @@ fun mainScreen(numbersOfVehicle: String, onClick: (vehicleDetail: String) -> Uni
     ridesViewMode.getVehicleList(numbersOfVehicle)
     val values: State<List<Vehicle>> = ridesViewMode.vehicleData.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    val state by ridesViewMode.state.collectAsState()
+    val strokeWidth = 5.dp
 
     var isRefreshing by remember { mutableStateOf(false) }
     val pullRefreshState = rememberPullRefreshState(
@@ -67,6 +69,15 @@ fun mainScreen(numbersOfVehicle: String, onClick: (vehicleDetail: String) -> Uni
             .pullRefresh(pullRefreshState)
     ) {
 
+        if (state.loading) {
+
+            CircularProgressIndicator(
+                modifier = Modifier.width(64.dp).
+                align(Alignment.Center),
+                color = Color.Blue
+            )
+
+        }
 
         LazyColumn {
             items(values.value) { item ->
